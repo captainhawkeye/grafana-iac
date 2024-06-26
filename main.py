@@ -23,7 +23,7 @@ def getDashboard():
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    response = requests.get(f"https://{grafanaUrl}/api/dashboards/uid/{dashboardUid}", headers=headers, verify=False)
+    response = requests.get(f"{grafanaUrl}/api/dashboards/uid/{dashboardUid}", headers=headers, verify=False)
     return response.json()
 
 # Function to store the dashboard data into GCS Bucket
