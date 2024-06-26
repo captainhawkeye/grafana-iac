@@ -26,6 +26,8 @@ jobs:
     - name: Set up environment variables
       run: |
         echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > $HOME/gcp-key.json
+        cat $HOME/gcp-key.json
+        sleep 20
 
     - name: Run the backup script
       env:
