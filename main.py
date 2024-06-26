@@ -14,7 +14,7 @@ dashboardUid = os.getenv("DASHBOARD_UID")
 bucketName = os.getenv("BUCKET_NAME")
 
 # Set the path to the service account key file to authenticate into GCP account
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_FILE")
 
 # Function to fetch the Dashboard from Grafana
 def getDashboard():
