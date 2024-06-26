@@ -25,11 +25,8 @@ jobs:
 
     - name: Set up environment variables
       run: |
-        echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > $HOME/gcp-key.json
-        echo 'export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcp-key.json"' >> ~/.bashrc
-        source ~/.bashrc
-        echo "Printing if variable works"
-        echo $GOOGLE_APPLICATION_CREDENTIALS
+        touch gcp-key.json
+        echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > gcp-key.json
 
     - name: Run the backup script
       env:
@@ -37,6 +34,6 @@ jobs:
         GRAFANA_SERVICE_ACC_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACC_TOKEN }}
         DASHBOARD_UID: ${{ secrets.DASHBOARD_UID }}
         BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-        GOOGLE_APPLICATION_CREDENTIALS: $HOME/gcp-key.json
+        GOOGLE_APPLICATION_CREDENTIALS: 'gcp-key.json'
       run: |
         python main.py
