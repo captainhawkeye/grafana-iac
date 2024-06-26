@@ -23,10 +23,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Set up environment variables
-      run: |
-        touch /tmp/gcp-key.json
-        echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > /tmp/gcp-key.json
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        version: 'latest'
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+        service_account_key: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Authenticate with GCP
+      run: echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" | gcloud auth activate-service-account --key-file=-
 
     - name: Run the backup script
       env:
@@ -34,6 +39,5 @@ jobs:
         GRAFANA_SERVICE_ACC_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACC_TOKEN }}
         DASHBOARD_UID: ${{ secrets.DASHBOARD_UID }}
         BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
-        GOOGLE_APPLICATION_CREDENTIALS_FILE: "/tmp/gcp-key.json"
       run: |
         python main.py
