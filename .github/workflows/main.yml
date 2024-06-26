@@ -26,8 +26,10 @@ jobs:
     - name: Set up environment variables
       run: |
         echo "${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}" > $HOME/gcp-key.json
-        cat $HOME/gcp-key.json
-        sleep 20
+        echo 'export GOOGLE_APPLICATION_CREDENTIALS="$HOME/gcp-key.json"' >> ~/.bashrc
+        source ~/.bashrc
+        echo "Printing if variable works"
+        echo $GOOGLE_APPLICATION_CREDENTIALS
 
     - name: Run the backup script
       env:
