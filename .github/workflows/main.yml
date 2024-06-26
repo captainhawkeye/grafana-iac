@@ -29,7 +29,7 @@ jobs:
 
     - name: Run the backup script
       env:
-        GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+        GRAFANA_URL: ${{ vars.GRAFANA_URL }}
         GRAFANA_SERVICE_ACC_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACC_TOKEN }}
         DASHBOARD_UID: ${{ secrets.DASHBOARD_UID }}
         BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
