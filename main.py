@@ -10,48 +10,63 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 # Read secrets from environment variables
 grafanaUrl = os.getenv("GRAFANA_URL")
 grafanaServiceAccToken = os.getenv("GRAFANA_SERVICE_ACC_TOKEN")
-dashboardUid = os.getenv("DASHBOARD_UID")
 bucketName = os.getenv("BUCKET_NAME")
+
+def read_dashboard_uid(filename):
+    with open(filename, "r") as file:
+        uid = file.read().splitlines()
+    return uid
 
 # Set the path to the service account key file to authenticate into GCP account
 #os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_FILE")
 
 # Function to fetch the Dashboard from Grafana
-def getDashboard():
+def getDashboard(uid):
     headers = {
         "Authorization": f"Bearer {grafanaServiceAccToken}",
         "Accept": "application/json",
         "Content-Type": "application/json"
     }
-    response = requests.get(f"{grafanaUrl}/api/dashboards/uid/{dashboardUid}", headers=headers, verify=False)
+    response = requests.get(f"https://{grafanaUrl}/api/dashboards/uid/{uid}", headers=headers, verify=False)
     return response.json()
 
 # Function to store the dashboard data into GCS Bucket
-def saveToBucket(data):
+def saveToBucket(data, name):
     client = storage.Client()
     bucket = client.get_bucket(bucketName)
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-    file_name = f"grafana_dashboard_backup_{current_time}.json"
+    file_name = f"grafana_dashboard_backup_{name}_{current_time}.json"
     blob = bucket.blob(file_name)
-    blob.upload_from_string(json.dumps(data))
+    blob.upload_from_string(json.dumps(data, indent=2))
 
     return file_name
 
-# Executes the function getDashboard() to fetch the dashboard and store it in a variable
-current_dashboard = getDashboard()
+dashboardUid = read_dashboard_uid("dashboard_uids.txt")
 
-# Creates a dummy local file with current date-time stamp
-current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-local_file_name = f"grafana_dashboard_backup_{current_time}.json"
 
-if os.path.exists(local_file_name):
-    with open(local_file_name, "r") as f:
-        previous_dashboard = json.load(f)
-else:
-    previous_dashboard = None
+for uid in dashboardUid:
+    print(f"Processing UID: {uid}")
+    current_dashboard = getDashboard(uid)
+    dashboard_name = current_dashboard['dashboard']['title']
+    saveToBucket(current_dashboard, dashboard_name)
+    print(f"The Grafana dashboard '{dashboard_name}' was successfully backed up")
 
-if previous_dashboard is None or current_dashboard != previous_dashboard:
-    file_name = saveToBucket(current_dashboard)
-    with open(local_file_name, "w") as f:
-        json.dump(current_dashboard, f)
-    print(f"Dashboard backup saved to {file_name}")
+
+# # Executes the function getDashboard() to fetch the dashboard and store it in a variable
+# current_dashboard = getDashboard()
+
+# # Creates a dummy local file with current date-time stamp
+# current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+# local_file_name = f"grafana_dashboard_backup_{current_time}.json"
+
+# if os.path.exists(local_file_name):
+#     with open(local_file_name, "r") as f:
+#         previous_dashboard = json.load(f)
+# else:
+#     previous_dashboard = None
+
+# if previous_dashboard is None or current_dashboard != previous_dashboard:
+#     file_name = saveToBucket(current_dashboard)
+#     with open(local_file_name, "w") as f:
+#         json.dump(current_dashboard, f)
+#     print(f"Dashboard backup saved to {file_name}")
