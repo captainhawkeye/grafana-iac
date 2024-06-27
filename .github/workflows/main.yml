@@ -1,9 +1,12 @@
 name: Grafana Cloud Dashboard Backup
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for Triggering this Job'
+        required: true
+        type: string
 
 jobs:
   backup_dashboard:
@@ -38,7 +41,6 @@ jobs:
       env:
         GRAFANA_URL: ${{ vars.GRAFANA_URL }}
         GRAFANA_SERVICE_ACC_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACC_TOKEN }}
-        DASHBOARD_UID: ${{ secrets.DASHBOARD_UID }}
         BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
       run: |
         python main.py
