@@ -41,7 +41,7 @@ def saveToBucket(data, name):
     return file_name
 
 # Execure read_dashboard_uid function
-dashboardUid = read_dashboard_uid("dashboard_uids.txt")
+dashboardUid = read_dashboard_uid("./backup/dashboard_uids.txt")
 
 # Iterate over each UID
 for uid in dashboardUid:
