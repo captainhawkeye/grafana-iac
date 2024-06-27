@@ -12,13 +12,11 @@ grafanaUrl = os.getenv("GRAFANA_URL")
 grafanaServiceAccToken = os.getenv("GRAFANA_SERVICE_ACC_TOKEN")
 bucketName = os.getenv("BUCKET_NAME")
 
+# Function to read UIDs from dashboards_uids.txt file
 def read_dashboard_uid(filename):
     with open(filename, "r") as file:
         uid = file.read().splitlines()
     return uid
-
-# Set the path to the service account key file to authenticate into GCP account
-#os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_FILE")
 
 # Function to fetch the Dashboard from Grafana
 def getDashboard(uid):
@@ -36,37 +34,19 @@ def saveToBucket(data, name):
     bucket = client.get_bucket(bucketName)
     current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
     file_name = f"grafana_dashboard_backup_{name}_{current_time}.json"
+    dashboard_data = data['dashboard']
     blob = bucket.blob(file_name)
-    blob.upload_from_string(json.dumps(data, indent=2))
+    blob.upload_from_string(json.dumps(dashboard_data, indent=2))
 
     return file_name
 
-dashboardUid = read_dashboard_uid("./backup/dashboard_uids.txt")
+# Execure read_dashboard_uid function
+dashboardUid = read_dashboard_uid("dashboard_uids.txt")
 
-
+# Iterate over each UID
 for uid in dashboardUid:
     print(f"Processing UID: {uid}")
     current_dashboard = getDashboard(uid)
     dashboard_name = current_dashboard['dashboard']['title']
     saveToBucket(current_dashboard, dashboard_name)
     print(f"The Grafana dashboard '{dashboard_name}' was successfully backed up")
-
-
-# # Executes the function getDashboard() to fetch the dashboard and store it in a variable
-# current_dashboard = getDashboard()
-
-# # Creates a dummy local file with current date-time stamp
-# current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
-# local_file_name = f"grafana_dashboard_backup_{current_time}.json"
-
-# if os.path.exists(local_file_name):
-#     with open(local_file_name, "r") as f:
-#         previous_dashboard = json.load(f)
-# else:
-#     previous_dashboard = None
-
-# if previous_dashboard is None or current_dashboard != previous_dashboard:
-#     file_name = saveToBucket(current_dashboard)
-#     with open(local_file_name, "w") as f:
-#         json.dump(current_dashboard, f)
-#     print(f"Dashboard backup saved to {file_name}")
