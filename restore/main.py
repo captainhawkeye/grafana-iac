@@ -3,8 +3,6 @@ import requests
 from google.cloud import storage
 import os
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "damontargaryen-project-ff928feac0e9.json"
-
 # Define constants
 #LOCAL_FILE_NAME = 'dashboard.json'
 GRAFANA_API_KEY = os.getenv("GRAFANA_SERVICE_ACC_TOKEN")
