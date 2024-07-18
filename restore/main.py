@@ -9,6 +9,8 @@ GRAFANA_API_KEY = os.getenv("GRAFANA_SERVICE_ACC_TOKEN")
 GRAFANA_API_URL = os.getenv("GRAFANA_URL")
 GCS_BUCKET_NAME = os.getenv("BUCKET_NAME")
 GCS_FILE_NAME = os.getenv("BACKUP_FILE")
+FOLDER_UID = os.getenv("FOLDER_UID")
+MESSAGE = os.getenv("MESSAGE")
 
 def fetch_dashboard_from_gcs(bucket_name, file_name):
     client = storage.Client()
@@ -30,7 +32,7 @@ def save_dashboard_to_local(file_name, dashboard_json):
     with open(file_name, 'w') as file:
         json.dump(dashboard_json, file, indent=2)
 
-def upload_to_grafana(dashboard_json, grafana_api_key, grafana_api_url):
+def upload_to_grafana(dashboard_json, grafana_api_key, grafana_api_url, folderUid, message):
     print("grafana_api_key", grafana_api_key)
     headers = {
     'Authorization': f'Bearer {grafana_api_key}',
@@ -55,8 +57,8 @@ def upload_to_grafana(dashboard_json, grafana_api_key, grafana_api_url):
 
     payload = json.dumps({
         "dashboard": dashboard_json,
-        "folderUid": "adq21zdzakc1sc",
-        "message": "Updated via API",
+        "folderUid": folderUid,
+        "message": message,
         "overwrite": False
     })
 
@@ -83,7 +85,7 @@ def upload_to_grafana(dashboard_json, grafana_api_key, grafana_api_url):
 def main():
     fetch_dashboard_from_gcs(GCS_BUCKET_NAME, GCS_FILE_NAME)
     dashboard_json = fetch_dashboard_from_local(GCS_FILE_NAME)
-    upload_to_grafana(dashboard_json, GRAFANA_API_KEY, GRAFANA_API_URL)
+    upload_to_grafana(dashboard_json, GRAFANA_API_KEY, GRAFANA_API_URL, FOLDER_UID, MESSAGE)
 
 if __name__ == "__main__":
     main()
