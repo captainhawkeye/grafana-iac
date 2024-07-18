@@ -1,0 +1,46 @@
+name: Grafana Cloud Dashboard Restore
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_file:
+        description: 'The name of the backup file to restore (e.g., grafana_dashboard_backup_2023-06-10T00:00:00.json)'
+        required: true
+
+jobs:
+  restore_dashboard:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests google-cloud-storage
+
+    - name: Set up Google Cloud SDK
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        version: 'latest'
+        project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v1
+      with:
+        credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
+    - name: Run the restore script
+      env:
+        GRAFANA_URL: ${{ vars.GRAFANA_URL }}
+        GRAFANA_SERVICE_ACC_TOKEN: ${{ secrets.GRAFANA_SERVICE_ACC_TOKEN }}
+        BUCKET_NAME: ${{ secrets.BUCKET_NAME }}
+        BACKUP_FILE: ${{ github.event.inputs.backup_file }}
+      run: |
+        python ./restore/main.py
